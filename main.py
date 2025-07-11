@@ -12,7 +12,7 @@ TARGET_CHAT_ID = -1002152321701  # ID цільового чату
 
 # /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("📷 Відправте фото відправлення:")
+    await update.message.reply_text("📸 Відправте фото відправлення:")
     return PHOTO
 
 # Фото
@@ -25,17 +25,20 @@ async def get_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Отримувач
 async def get_receiver(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['receiver'] = update.message.text
+    context.user_data['centers'] = []
+
     keyboard = [
         [KeyboardButton("РЦК")],
         [KeyboardButton("РЦЛ")],
-        [KeyboardButton("РЦВ")]
+        [KeyboardButton("РЦВ")],
+        [KeyboardButton("Готово")]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     await update.message.reply_text(
-        "🏢 Куди відправлення? Оберіть одне або декілька. Коли закінчите — напишіть 'Готово'.",
+        "🏢 Куди відправлення?\n"
+        "Оберіть один або декілька РЦ. Коли завершите — натисніть *Готово*.",
         reply_markup=reply_markup
     )
-    context.user_data['centers'] = []
     return CENTER
 
 # Центри
@@ -44,10 +47,23 @@ async def get_center(update: Update, context: ContextTypes.DEFAULT_TYPE):
     valid_centers = {"РЦК", "РЦЛ", "РЦВ"}
 
     if text == "ГОТОВО":
-        request_contact_button = KeyboardButton("📞 Надіслати номер", request_contact=True)
-        reply_markup = ReplyKeyboardMarkup([[request_contact_button]], one_time_keyboard=True, resize_keyboard=True)
-        await update.message.reply_text("📱 Поділіться, будь ласка, своїм номером телефону:", reply_markup=reply_markup)
+        if not context.user_data["centers"]:
+            await update.message.reply_text("⚠️ Ви ще не обрали жодного РЦ.")
+            return CENTER
+
+        button = KeyboardButton("📱 Надіслати номер", request_contact=True)
+        reply_markup = ReplyKeyboardMarkup([[button]], one_time_keyboard=True, resize_keyboard=True)
+        await update.message.reply_text("📞 Надішліть свій номер телефону:", reply_markup=reply_markup)
         return PHONE
+
+    elif text in valid_centers:
+        if text not in context.user_data["centers"]:
+            context.user_data["centers"].append(text)
+        return CENTER
+
+    else:
+        await update.message.reply_text("⚠️ Виберіть доступний РЦ або натисніть 'Готово'")
+        return CENTER
 
 # Телефон
 async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -55,7 +71,7 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["phone"] = phone_number
 
     caption = (
-        f"📦 *Відправлення*\n"
+        "📦 *Відправлення*\n"
         f"👤 Отримувач: {context.user_data['receiver']}\n"
         f"🏢 РЦ: {', '.join(context.user_data['centers'])}\n"
         f"📞 Номер телефону: {context.user_data['phone']}"
@@ -98,4 +114,4 @@ async def main():
 
 if __name__ == "__main__":
     nest_asyncio.apply()
-    asyncio.run(main())
+    asyncio.run(main()
