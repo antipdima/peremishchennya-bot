@@ -8,18 +8,18 @@ import asyncio
 
 # Стани діалогу
 PHOTO, RECEIVER, CENTER, PHONE = range(4)
-TARGET_CHAT_ID = -1002152321701  # ID чату, куди надсилати
+TARGET_CHAT_ID = -1002152321701  # ID цільового чату
 
 # /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Відправте фото відправлення")
+    await update.message.reply_text("📷 Відправте фото відправлення:")
     return PHOTO
 
 # Фото
 async def get_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     photo = update.message.photo[-1].file_id
     context.user_data['photo'] = photo
-    await update.message.reply_text("Кому відправлення? (прізвище та ініціали)")
+    await update.message.reply_text("👤 Кому відправлення? (Прізвище та ініціали)")
     return RECEIVER
 
 # Отримувач
@@ -32,47 +32,40 @@ async def get_receiver(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     await update.message.reply_text(
-        "Куди відправлення? Оберіть одне або декілька. Коли закінчите — напишіть 'Готово'",
+        "🏢 Куди відправлення? Оберіть одне або декілька. Коли закінчите — напишіть 'Готово'.",
         reply_markup=reply_markup
     )
     context.user_data['centers'] = []
     return CENTER
 
-# РЦ
+# Центри
 async def get_center(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.upper()
     valid_centers = {"РЦК", "РЦЛ", "РЦВ"}
 
     if text == "ГОТОВО":
-        request_contact_button = KeyboardButton("Надіслати номер", request_contact=True)
+        request_contact_button = KeyboardButton("📞 Надіслати номер", request_contact=True)
         reply_markup = ReplyKeyboardMarkup([[request_contact_button]], one_time_keyboard=True, resize_keyboard=True)
-        await update.message.reply_text("Будь ласка, поділіться номером телефону:", reply_markup=reply_markup)
+        await update.message.reply_text("📱 Поділіться, будь ласка, своїм номером телефону:", reply_markup=reply_markup)
         return PHONE
-
-    elif text in valid_centers:
-        if text not in context.user_data["centers"]:
-            context.user_data["centers"].append(text)
-        return CENTER
-    else:
-        await update.message.reply_text("Будь ласка, виберіть центр зі списку або напишіть 'Готово'")
-        return CENTER
 
 # Телефон
 async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     phone_number = update.message.contact.phone_number if update.message.contact else update.message.text
     context.user_data["phone"] = phone_number
 
-    # Формування повідомлення
     caption = (
-        f"Отримувач: {context.user_data['receiver']}\n"
-        f"РЦ: {', '.join(context.user_data['centers'])}\n"
-        f"Номер телефона: {context.user_data['phone']}"
+        f"📦 *Відправлення*\n"
+        f"👤 Отримувач: {context.user_data['receiver']}\n"
+        f"🏢 РЦ: {', '.join(context.user_data['centers'])}\n"
+        f"📞 Номер телефону: {context.user_data['phone']}"
     )
 
     await context.bot.send_photo(
         chat_id=TARGET_CHAT_ID,
         photo=context.user_data["photo"],
-        caption=caption
+        caption=caption,
+        parse_mode="Markdown"
     )
     await update.message.reply_text("✅ Дякуємо! Ваше відправлення збережено.", reply_markup=ReplyKeyboardRemove())
     return ConversationHandler.END
