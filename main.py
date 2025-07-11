@@ -3,6 +3,7 @@ from telegram.ext import (
     ApplicationBuilder, CommandHandler, MessageHandler, filters,
     ConversationHandler, ContextTypes
 )
+import nest_asyncio
 import asyncio
 
 PHOTO, RECEIVER, CENTER, PHONE = range(4)
@@ -90,5 +91,7 @@ async def main():
     await application.run_polling()
 
 if __name__ == "__main__":
+    nest_asyncio.apply()
     asyncio.run(main())
+
 
