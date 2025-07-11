@@ -58,9 +58,11 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     centers = ", ".join(context.user_data["centers"])
     phone = context.user_data["phone"]
 
-    caption = f"Отримувач: {receiver}"
-Центри: {centers}
-Номер телефону: {phone}"
+    caption = (
+    f"Отримувач: {receiver}\n"
+    f"Центр: {centers}\n"
+    f"Номер телефона: {phone}"
+)
 
     await context.bot.send_photo(chat_id=TARGET_CHAT_ID, photo=photo, caption=caption)
 
