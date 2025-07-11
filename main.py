@@ -19,7 +19,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def get_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     photo = update.message.photo[-1].file_id
     context.user_data['photo'] = photo
-    await update.message.reply_text("Кому відправлення?")
+    await update.message.reply_text("Кому відправлення? (прізвище та ініціали)")
     return RECEIVER
 
 # Отримувач
@@ -38,10 +38,10 @@ async def get_receiver(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['centers'] = []
     return CENTER
 
-# Центри
+# РЦ
 async def get_center(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.upper()
-    valid_centers = {"РУЦ", "РЦК", "РЦЛ", "РЦВ"}
+    valid_centers = {"РЦК", "РЦЛ", "РЦВ"}
 
     if text == "ГОТОВО":
         request_contact_button = KeyboardButton("Надіслати номер", request_contact=True)
@@ -65,7 +65,7 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Формування повідомлення
     caption = (
         f"Отримувач: {context.user_data['receiver']}\n"
-        f"Центри: {', '.join(context.user_data['centers'])}\n"
+        f"РЦ: {', '.join(context.user_data['centers'])}\n"
         f"Номер телефона: {context.user_data['phone']}"
     )
 
