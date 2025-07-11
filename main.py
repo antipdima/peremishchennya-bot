@@ -1,6 +1,6 @@
-
 from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters, ConversationHandler
+import asyncio
 
 PHOTO, RECEIVER, CENTER, PHONE = range(4)
 TARGET_CHAT_ID = -1002152321701  # справжній ID групи
@@ -56,7 +56,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
    await update.message.reply_text("Операцію скасовано.", reply_markup=ReplyKeyboardRemove())
    return ConversationHandler.END
 
-if __name__ == '__main__':
+async def main():
    TOKEN = "7852735303:AAFydrs-NvtHZwMc9ztWKRyWZgP7HaBNsv4"
    app = ApplicationBuilder().token(TOKEN).build()
 
@@ -70,6 +70,12 @@ if __name__ == '__main__':
        },
        fallbacks=[CommandHandler('cancel', cancel)]
    )
+
+   app.add_handler(conv_handler)
+   await app.run_polling()
+
+if __name__ == '__main__':
+   asyncio.run(main())
 
    app.add_handler(conv_handler)
    app.run_polling()
