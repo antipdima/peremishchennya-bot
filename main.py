@@ -46,7 +46,7 @@ async def get_center(update: Update, context: ContextTypes.DEFAULT_TYPE):
     valid_centers = {"РЦК", "РЦЛ", "РЦВ"}
 
     if text == "ГОТОВО":
-        if not context.user_data["centers"]:
+        if not context.user_data.get("centers"):
             await update.message.reply_text("⚠️ Ви ще не обрали жодного РЦ.")
             return CENTER
         request_contact_button = KeyboardButton("📞 Надіслати номер", request_contact=True)
@@ -55,9 +55,15 @@ async def get_center(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return PHONE
 
     elif text in valid_centers:
-        if text not in context.user_data["centers"]:
-            context.user_data["centers"].append(text)
+        centers = context.user_data.setdefault("centers", [])
+        if text not in centers:
+            centers.append(text)
         return CENTER
+
+    else:
+        await update.message.reply_text("⚠️ Виберіть РЦ зі списку або натисніть 'Готово'")
+        return CENTER
+
 
     else:
         await update.message.reply_text("⚠️ Виберіть РЦ зі списку або натисніть 'Готово'")
